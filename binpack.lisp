@@ -15,6 +15,77 @@
   (with-rect (x y rw rh) rect
     (min (- rw w) (- rh h))))
 
+(defun grow-rects (rects dx dy)
+  (destructuring-bind (x1 y1)
+      (loop for (x y w h) in rects
+            maximize (+ x w) into mx
+            maximize (+ y h) into my
+            finally (return (list mx my)))
+    (let ((x-edges ())
+          (y-edges ()))
+      (loop
+        for r in rects
+        do (with-rect (x y w h) r
+             (when (= x1 (+ x w))
+               (push r y-edges)
+               (incf (third r) dx))
+             (when (= y1 (+ y h))
+               (push r x-edges)
+               (incf (fourth r) dy))))
+      (setf x-edges (sort x-edges '< :key 'first)
+            y-edges (sort y-edges '< :key 'second))
+      (format t "x:~s~%" x-edges)
+      (format t "y:~s~%" y-edges)
+      (when (and x-edges (plusp dy))
+        ;; start outside edge to simplify handling of edge
+        (loop with live = (list (list -1 0 1 0))
+              with start = nil
+              for x below (+ x1 dx)
+              for in = live
+              do (loop for edge = (car x-edges)
+                       while (and edge (<= (first edge) x))
+                       do (push (pop x-edges) live))
+                 (setf live (loop for l in live
+                                  for (lx nil w nil) = l
+                                  unless (< (+ lx w) x)
+                                    collect l))
+                 (when (and in (not live))
+                   (setf start x))
+                 (when (and live (not in))
+                   ;; fixme: put rects in an object or something
+                   ;; instead of expanding it from the middle like
+                   ;; this...
+                   (push (print (list start y1 (- x start -1) dy)) (cdr rects))
+                   (setf start nil))))
+      (when (and y-edges (plusp dx))
+        ;; start outside edge to simplify handling of edge
+        (loop with live = (list (list 0 -1 0 1))
+              with start = nil
+              for y from -1 below (+ y1 dy)
+              for in = live
+              do (loop for edge = (car y-edges)
+                       while (and edge (<= (first edge) y))
+                       do (push (pop y-edges) live))
+                 (setf live (loop for l in live
+                                  for (ly nil w nil) = l
+                                  unless (< (+ ly w) y)
+                                    collect l))
+                 (when (and in (not live))
+                   (setf start y))
+                 (when (and live (not in))
+                   ;; fixme: put rects in an object or something
+                   ;; instead of expanding it from the middle like
+                   ;; this...
+                   (push (print (list x1 start dx (- y start -1))) (cdr rects))
+                   (setf start nil)))))))
+
+(define-condition packing-failed (simple-error)
+  ((w :reader w :initarg :w)
+   (h :reader h :initarg :h))
+  (:report (lambda (c s)
+             (format s "Cannot pack any more rectangles (trying to pack ~sx~s)"
+                     (w c) (h c)))))
+
 (defun find-free-rect (w h rects)
   (loop with min-rect = (car rects)
      with min-d = (delta-weight w h min-rect)
@@ -24,9 +95,22 @@
      when (or (< min-d 0) (and (>= cur-d 0) (< cur-d min-d)))
      do (setf min-rect rect
               min-d cur-d)
-     finally (return (if (< min-d 0)
-                         (error "Cannot pack any more rectangles")
-                         min-rect))))
+     finally (return
+               (if (< min-d 0)
+                   (restart-case
+                       (error 'packing-failed :w w :h h)
+                     (expand (dx dy)
+                       :interactive (lambda ()
+                                      (format t "expand by (dx dy):")
+                                      (read))
+                       (when (or (not (integerp dx))
+                                 (not (integerp dy))
+                                 (minusp dx) (minusp dy)
+                                 (and (zerop dx) (zerop dy)))
+                         (error "can't expand packing by ~sx~s" dx dy))
+                       (grow-rects rects dx dy)
+                       (find-free-rect w h rects)))
+                   min-rect))))
 
 (defun intersectsp (r0 r1)
   (with-rect (x0 y0 w0 h0) r0
