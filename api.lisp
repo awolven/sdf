@@ -152,7 +152,7 @@
         out)))
 
 (defun make-atlas (font-name pixel-size
-                   &key (spread 8.5)
+                   &key (spread 8.5f0)
                      string
                      (width :auto) (height :auto)
                      ((:mode *backend*) :sdf)
@@ -200,7 +200,6 @@
                        (format t "packing ~s glyphs = ~s pixels~%" l pixels))
                       ((eql verbose :dots)
                        (format t "P")))
-                    (multiple-value-list
                      (binpack/2:auto-pack
                       rects
                       max-width max-height
@@ -218,18 +217,20 @@
                                        :w w1
                                        :h h1
                                        :dx auto-size-granularity-x
-                                       :dy auto-size-granularity-y))))))
+                                       :dy auto-size-granularity-y)))))
            (pack (car %pack))
            (dims (cdr %pack)))
       (when (eql verbose t)
         (format t " packed to ~s (~s,~s)~%"
-                (* (first dims) (second dims)) (first dims) (second dims)))
+                (* (first dims) (second dims)) (first dims) (second dims))
+        (finish-output))
       (when (and optimize-pack
                  (or (eql width :auto) (eql height :auto)))
         ;; optionally try packing into some other sizes, since initial
         ;; size affects heuristic behavior
         (when (eql verbose t)
-          (format t "optimizing pack...~%"))
+          (format t "optimizing pack...~%")
+          (finish-output))
         (let ((best-dims dims)
               (best-pack pack)
               (n (if (integerp optimize-pack)
@@ -250,8 +251,8 @@
                                            dy))))
                           (p2 (progn
                                 (when (eql verbose :dots)
-                                  (format t "p"))
-                                (multiple-value-list
+                                  (format t "p")
+                                  (finish-output))
                                  (binpack/2:auto-pack
                                   rects
                                   max-width max-height
@@ -262,7 +263,7 @@
                                                  :w w1
                                                  :h h1
                                                  :dx auto-size-granularity-x
-                                                 :dy auto-size-granularity-y)))))
+                                                 :dy auto-size-granularity-y))))
                           (d2 (cdr p2))
                           (a2 (* (* auto-size-granularity-x
                                     (ceiling (first d2)
@@ -272,7 +273,8 @@
                                              auto-size-granularity-y)))))
                      (when (eql verbose t)
                        (format t " repacked ~s(-~s,-~s) @ ~s,~s -> ~s (~s) = ~s~%"
-                               i dx dy w1 h1 (* (first d2) (second d2)) a2 d2))
+                               i dx dy w1 h1 (* (first d2) (second d2)) a2 d2)
+                       (finish-output))
                      (when (< a2 a1)
                        (setf a1 a2
                              best-dims d2
@@ -284,22 +286,27 @@
                        (try1 i i i))))
           (setf dims best-dims pack best-pack))
         (when (eql verbose t)
-          (format t "best -> ~s ~s~%"  (* (first dims) (second dims)) dims)))
+          (format t "best -> ~s ~s~%"  (* (first dims) (second dims)) dims)
+          (finish-output)))
+
       (when (or (eql width :auto) optimize-pack)
         (setf width
               (* auto-size-granularity-x
                  (ceiling (first dims) auto-size-granularity-x))))
+
       (when (or (eql height :auto) optimize-pack)
         (setf height
               (* auto-size-granularity-y
                  (ceiling (second dims) auto-size-granularity-y))))
+
       (when trim
         (setf height (second dims))
         (unless (eql trim :y-only)
           (setf width (first dims))))
       (when (eql verbose t)
         (format t "final size = ~sx~s (~s pixels)~%"
-                width height (* width height)))
+                width height (* width height))
+        (finish-output))
       (let* ((out (fill-atlas width height (b::channels-for-type *backend*)
                               pack)))
         (st::%make-atlas *backend* spread out

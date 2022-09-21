@@ -99,7 +99,7 @@
           (let ((m1 (aref pimage j1 i1))
                 (m2 (aref pimage j2 i2)))
             (when (< (+ (abs m1) (abs m2))
-                     (* 1.001
+                     (* 1.001f0
                         (sqrt (+ (expt (float (- i2 i1)) 2)
                                  (expt (float (- j2 j1)) 2)))))
               (loop for c below 3
@@ -121,8 +121,8 @@
                              (setf (aref protected j2 i2) 1)
                              (loop-finish))))))))))))
 
-(defparameter *feb-edge-epsilon* 0.01)
-(defparameter *feb-distance-epsilon* 0.111)
+(defparameter *feb-edge-epsilon* 0.01f0)
+(defparameter *feb-distance-epsilon* 0.111f0)
 (defun find-errors-base (errors protected image pimage)
   (declare (type (or (simple-array single-float (* * 3))
                      (simple-array single-float (* * 4)))
@@ -208,9 +208,9 @@
                               ;; 2 ac2 tt + ac1 = 0
                               ;; tt = (/ (- ac1) (* 2 ac2)
                               (amt (unless (zerop ac2)
-                                     (float (/ (- ac1) (* 2 ac2)) 1.0)))
+                                     (float (/ (- ac1) (* 2 ac2)) 1.0f0)))
                               (bmt (unless (zerop bc2)
-                                     (float (/ (- bc1) (* 2 bc2)) 1.0))))
+                                     (float (/ (- bc1) (* 2 bc2)) 1.0f0))))
                          (labels ((c-at2 (at1 at2 c)
                                     (a:lerp at2
                                             (a:lerp at1
@@ -247,17 +247,17 @@
                                                             (c-at2 tt tt b)))
                                                     0.001))
                                       (let ((m (median-at2 tt tt)))
-                                        (check m m1 m2 tt 0.0 1.0)
+                                        (check m m1 m2 tt 0.0f0 1.0f0)
                                         (when (and amt (< 0 amt 1) (/= amt tt))
                                           (let ((mat1 (median-at2 amt amt)))
                                             (if (< amt tt)
-                                                (check m mat1 m2 tt amt 1.0)
-                                                (check m m1 mat1 tt 0.0 amt))))
+                                                (check m mat1 m2 tt amt 1.0f0)
+                                                (check m m1 mat1 tt 0.0f0 amt))))
                                         (when (and bmt (< 0 bmt 1) (/= bmt tt))
                                           (let ((mbt1 (median-at2 bmt bmt)))
                                             (if (< bmt tt)
-                                                (check m mbt1 m2 tt bmt 1.0)
-                                                (check m m1 mbt1 tt 0.0 bmt))))))))
+                                                (check m mbt1 m2 tt bmt 1.0f0)
+                                                (check m m1 mbt1 tt 0.0f0 bmt))))))))
                            (declare (dynamic-extent #'check #'d-pair2))
                            (cond
                              ((or (zerop qa) (minusp qd))

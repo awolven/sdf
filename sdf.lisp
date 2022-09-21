@@ -281,7 +281,7 @@
            (image (make-array (list* wy wx (a:ensure-list
                                             (channels-for-type type)))
                               :element-type 'single-float
-                              :initial-element 0.0))
+                              :initial-element 0.0f0))
            (samples/x (make-array wx :element-type 'real
                                      :initial-element 0))
            (samples/y (make-array wy :element-type 'real

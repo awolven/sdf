@@ -285,10 +285,10 @@
            (image (image sdf))
            (simage (make-array (subseq (array-dimensions image) 0 2)
                                :element-type 'single-float
-                               :initial-element 0.0))
+                               :initial-element 0.0f0))
            (pimage (make-array (subseq (array-dimensions image) 0 2)
                                :element-type 'single-float
-                               :initial-element 0.0))
+                               :initial-element 0.0f0))
            (shape (simplified-shape sdf))
            (corners1 (corner-angles shape))
            (min-length (f (min-sharp-edge-length sdf)))
