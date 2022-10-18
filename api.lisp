@@ -200,6 +200,7 @@
                        (format t "packing ~s glyphs = ~s pixels~%" l pixels))
                       ((eql verbose :dots)
                        (format t "P")))
+                    (multiple-value-list
                      (binpack/2:auto-pack
                       rects
                       max-width max-height
@@ -217,7 +218,7 @@
                                        :w w1
                                        :h h1
                                        :dx auto-size-granularity-x
-                                       :dy auto-size-granularity-y)))))
+                                       :dy auto-size-granularity-y))))))
            (pack (car %pack))
            (dims (cdr %pack)))
       (when (eql verbose t)
@@ -253,6 +254,7 @@
                                 (when (eql verbose :dots)
                                   (format t "p")
                                   (finish-output))
+                                (multiple-value-list
                                  (binpack/2:auto-pack
                                   rects
                                   max-width max-height
@@ -263,7 +265,7 @@
                                                  :w w1
                                                  :h h1
                                                  :dx auto-size-granularity-x
-                                                 :dy auto-size-granularity-y))))
+                                                 :dy auto-size-granularity-y)))))
                           (d2 (cdr p2))
                           (a2 (* (* auto-size-granularity-x
                                     (ceiling (first d2)

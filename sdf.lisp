@@ -118,7 +118,7 @@
                                      (%distance-to-shape
                                       x y points segments curves)
                                      (* scale spread)))
-                               1.0)))))))
+                               1.0f0)))))))
 
 (defun pseudo-distance-to-shape (shape x y)
   (let ((d 0) (n nil))
@@ -168,11 +168,11 @@
                                  (float
                                   (* (if (zerop (aref signs j i)) -1 1)
                                      (/ d scale))
-                                  1.0)
+                                  1.0f0)
                                  (float
                                   (* (if (zerop (aref signs j i)) -1 1)
                                      (/ pd scale))
-                                  1.0)
+                                  1.0f0)
                                  n))))))
 
 (defun render-sdf/psdf (sdf)
@@ -247,7 +247,7 @@
                          (samples/y sdf)
                          (%make-edge-list s2 (samples/x sdf)))))
 
-(defun make-sdf (type shape &key (spread 2.5) (scale 1) integer-offset
+(defun make-sdf (type shape &key (spread 2.5f0) (scale 1) integer-offset
                               (render t) origin wx wy
                               (min-sharp-edge-length 1))
   (when integer-offset
