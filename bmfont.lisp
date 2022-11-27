@@ -26,18 +26,18 @@
             for (xo yo) = (st::glyph-origin glyph)
             for i from 0
             do (setf (gethash char chars)
-                     (list :id (char-code char)
-                           :index i
+                     (3b-bmfont-common:make-glyph :id (char-code char)
+						  ;;:index i
                            :char (string char)
                            :x x
                            :y y
                            :width w
                            :height h
                            :xoffset #++(+ (- (float xo)) spread)
-                                    (- (float xo))
+                                    (- (float xo 1.0f0))
                            :yoffset (float (+ base
                                               (- yo h)
-                                              spread))
+                                              spread) 1.0f0)
                            :xadvance (st::glyph-advance-width glyph)
                            :chnl (ecase channels (1 4) (2 6) (3 7) (4 15))
                            :page 0)))
