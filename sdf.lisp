@@ -187,6 +187,7 @@
     (ecase (sdf-type sdf)
       (:sdf (render-sdf/sdf sdf))
       (:psdf (render-sdf/psdf sdf))
+      #+NOTYET
       (:smsdf (render-sdf/smsdf sdf))
       (:msdf (render-sdf/msdf sdf))
       (:mtsdf (render-sdf/msdf sdf :mtsdf t)))))
