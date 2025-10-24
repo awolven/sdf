@@ -68,6 +68,9 @@
                           (aref image j i 1)
                           (aref image j i 2)))
                (v3 (a b c)
+		 (setq a (coerce a 'single-float))
+		 (setq b (coerce b 'single-float))
+		 (setq c (coerce c 'single-float))
                  (make-array 3 :element-type 'single-float
                                :initial-contents (list a b c)))
                (lerp-at (at)
